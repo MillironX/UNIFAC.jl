@@ -6,6 +6,30 @@ module UNIFAC
 
 export unifac
 
+"""
+    unifac(ν, x, T)
+
+Calculates the activity coefficients of the chemical species described by the
+UNIFAC groups in `ν`, at the liquid mole fractions `x` and temperature `T` in
+Kelvins.
+
+`ν` is constructed as a 56 x n `Array{Int}`, such that `ν[i,j]` is the number
+of times subgroup `i` appears in molecule `j`.
+
+# Example
+
+```julia-repl
+julia> ν = zeros(56, 2);
+julia> ν[1, 1] = 2;
+julia> ν[2, 1] = 1;
+julia> ν[33, 1] = 1;
+julia> ν[1, 2] = 2;
+julia> ν[2, 2] = 5;
+julia> unifac(ν, [0.4 0.6], 308.15)
+1×2 Array{Float64,2}:
+ 1.133  1.047
+```
+"""
 function unifac(ν, x, T)
 # unifac takes three arguments:
 # ν (that's the Greek lowercase nu) is a 56 x n Integer array where n is the
@@ -13,6 +37,12 @@ function unifac(ν, x, T)
 #   instances of subgroup k are present in a single molecule of species i
 # x is a 1 x n Float64 array that contains the liquid species mole fractions
 # T is the temperature of the system in Kelvins
+
+# Most subgroup parameters and interactions are taken from Smith, Van Ness, &
+# Abbott, _Introduction to Chemical Engineering Thermodynamics_, 7th Ed. pp.
+# 791-7. Some subgroup parameters are taken from Dr. Aston's given table, and
+# some of the interactions for those species are taken from
+# http://www.aim.env.uea.ac.uk/aim/info/UNIFACgroups.html
 
     # Declare the UNIFAC subgroup parameters
     R = Array{Float64}(undef, 56, 1)
@@ -69,6 +99,7 @@ function unifac(ν, x, T)
     a[1:4, 25:27] .= 251.50
     a[1:4, 32:34] .= 255.70
     a[1:4, 41:42] .= 597.00
+    a[1:4, 56]    .= 661.50
 
     a[10, 1:4]   .= -11.12
     a[10, 12:13] .= 167.00
@@ -78,6 +109,7 @@ function unifac(ν, x, T)
     a[10, 25:27] .= 32.14
     a[10, 32:34] .= 122.80
     a[10, 41:42] .= 212.50
+    a[10, 56]     = 168.00
 
     a[12:13, 1:4]   .= -69.70
     a[12:13, 10]    .= -146.80
@@ -87,6 +119,7 @@ function unifac(ν, x, T)
     a[12:13, 25:27] .= 213.10
     a[12:13, 32:34] .= -49.29
     a[12:13, 41:42] .= 6096.00
+    a[12:13, 56]    .= 3629.0
 
     a[15, 1:4]   .= 156.40
     a[15, 10]     = 89.60
@@ -96,6 +129,7 @@ function unifac(ν, x, T)
     a[15, 25:27] .= 28.06
     a[15, 32:34] .= 42.70
     a[15, 41:42] .= 6.712
+    a[15, 56]     = 256.5
 
     a[17, 1:4]   .= 300.00
     a[17, 10]     = 362.30
@@ -105,6 +139,7 @@ function unifac(ν, x, T)
     a[17, 25:27] .= 540.50
     a[17, 32:34] .= 168.00
     a[17, 41:42] .= 112.60
+    a[17, 56]     = 220.60
 
     a[19:20, 1:4]   .= 26.79
     a[19:20, 10]    .= 140.10
@@ -114,6 +149,7 @@ function unifac(ν, x, T)
     a[19:20, 25:27] .= -103.60
     a[19:20, 32:34] .= -174.20
     a[19:20, 41:42] .= 481.70
+    a[19:20, 56]    .= 137.50
 
     a[25:27, 1:4]   .= 83.36
     a[25:27, 10]    .= 52.13
@@ -123,6 +159,7 @@ function unifac(ν, x, T)
     a[25:27, 19:20] .= 191.10
     a[25:27, 32:34] .= 251.50
     a[25:27, 41:42] .= -18.51
+    a[25:27, 56]    .= 95.108
 
     a[32:34, 1:4]   .= 65.33
     a[32:34, 10]    .= -22.31
@@ -141,6 +178,16 @@ function unifac(ν, x, T)
     a[41:42, 19:20] .= -287.50
     a[41:42, 25:27] .= 38.81
     a[41:42, 32:34] .= -108.50
+    a[41:41, 56]    .= -0.5150
+
+    a[56, 1:4]   .= -32.690
+    a[56, 10]    .= 10.380
+    a[56, 12:13] .= -97.050
+    a[56, 15]    .= 261.60
+    a[56, 17]    .= 417.90
+    a[56, 19:20] .= -142.60
+    a[56, 25:27] .= -94.490
+    a[56, 41:42] .= 0.28270
 
     # Calculate r
     r = zeros(1, size(ν, 2))
