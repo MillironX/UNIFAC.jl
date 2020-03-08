@@ -8,14 +8,14 @@ export unifac
 
 function unifac(ν, x, T)
 # unifac takes three arguments:
-# ν (that's the Greek lowercase nu) is a 42 x n Integer array where n is the
+# ν (that's the Greek lowercase nu) is a 56 x n Integer array where n is the
 #   number of species in the system. The number at ν[k,i] indicates how many
 #   instances of subgroup k are present in a single molecule of species i
 # x is a 1 x n Float64 array that contains the liquid species mole fractions
 # T is the temperature of the system in Kelvins
 
     # Declare the UNIFAC subgroup parameters
-    R = Array{Float64}(undef, 42, 1)
+    R = Array{Float64}(undef, 56, 1)
     R[1]  = 0.9011
     R[2]  = 0.6744
     R[3]  = 0.4469
@@ -35,8 +35,9 @@ function unifac(ν, x, T)
     R[34] = 0.9795
     R[41] = 1.8701
     R[42] = 1.6434
+    R[56] = 1.7818
 
-    Q = Array{Float64}(undef, 42, 1)
+    Q = Array{Float64}(undef, 56, 1)
     Q[1]  = 0.848
     Q[2]  = 0.540
     Q[3]  = 0.228
@@ -56,9 +57,10 @@ function unifac(ν, x, T)
     Q[34] = 0.624
     Q[41] = 1.724
     Q[42] = 1.416
+    Q[56] = 1.560
 
     # Declare the subgroup interaction parameters
-    a = zeros(42, 42)
+    a = zeros(56, 56)
     a[1:4, 10]    .= 61.13
     a[1:4, 12:13] .= 76.50
     a[1:4, 15]    .= 986.50
@@ -153,7 +155,7 @@ function unifac(ν, x, T)
     end
 
     # Calculate e
-    e = zeros(42, size(ν, 2))
+    e = zeros(56, size(ν, 2))
     for i in 1:size(ν,2 )
         e[:, i] = (ν[:, i] .* Q) ./ q[i]
     end
@@ -162,22 +164,22 @@ function unifac(ν, x, T)
     τ = exp.(-a ./ T)
 
     # Calculate beta
-    β = zeros(42, size(ν, 2))
+    β = zeros(56, size(ν, 2))
     for i in 1:size(ν, 2)
-        for k in 1:42
+        for k in 1:56
             β[k, i] = sum(e[:, i] .* τ[:, k])
         end
     end
 
     # Calculate Theta
-    Θ = zeros(42, 1)
-    for k in 1:42
+    Θ = zeros(56, 1)
+    for k in 1:56
         Θ[k] = sum(x .* q .* e[k, :]') / sum(x .* q)
     end
 
     # Calculate s
-    s = zeros(42, 1)
-    for k in 1:42
+    s = zeros(56, 1)
+    for k in 1:56
         s[k] = sum(Θ .* τ[:, k])
     end
 
@@ -191,7 +193,7 @@ function unifac(ν, x, T)
     for i in 1:size(ν, 2)
         γ_R[i] = q[i] * (1 - sum(Θ .* β[:, i] ./ s .- e[:, i] .* log.(β[:, i] ./ s)))
     end
-	
+
 	# Return the activity coefficients
     γ = exp.(γ_C .+ γ_R)
 
